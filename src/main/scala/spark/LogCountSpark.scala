@@ -5,7 +5,7 @@ import org.apache.spark.sql.types.StructType
 /**
   * Created by wshino on 2017/07/05.
   */
-object Main extends App {
+object LogCountSpark extends App {
 
   import org.apache.spark.sql.SparkSession
 
