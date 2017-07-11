@@ -11,18 +11,20 @@ import scala.util.{Failure, Success, Try}
   */
 object LogCountFlink extends App {
 
-  // TODO NOT WORK.
+  var port: Int = 0
+
   case class AccessLog(api: String, version: String, recommendId: String, targetAndFallback: String, count: Long = 1)
+  case class AccessPrintLog(recommendId: String, count: Long = 1)
 
   // the port to connect to
-  val port: Int = Try {
-    ParameterTool.fromArgs(args).getInt("port")
-  } match {
-    case Success(v) => v
-    case Failure(e) =>
+  try {
+    port = ParameterTool.fromArgs(args).getInt("port")
+  } catch {
+    case e: Exception => {
       System.err.println("No port specified. Please run 'APIRequestLogCount --port <port>'")
-      1
+    }
   }
+
 
   // get the execution environment
   val env: StreamExecutionEnvironment = StreamExecutionEnvironment.getExecutionEnvironment
@@ -32,12 +34,17 @@ object LogCountFlink extends App {
   val recommendIdCounts = text
     .map { req =>
       val segments = req.split("/").tail.toList
-      AccessLog(segments(0), segments(1), segments(2), segments(4))
+      val target = segments.size match {
+        case x if x > 3 => segments(3)
+        case _ => ""
+      }
+      AccessLog(segments(0), segments(1), segments(2), target)
     }
+    .map(x => AccessPrintLog(x.recommendId))
     .keyBy("recommendId")
-    .timeWindow(Time.seconds(5), Time.seconds(1))
     .sum("count")
 
   recommendIdCounts.print().setParallelism(1)
+
   env.execute("Count API request log")
 }
