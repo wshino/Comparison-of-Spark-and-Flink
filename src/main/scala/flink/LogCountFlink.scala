@@ -2,9 +2,6 @@ package flink
 
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala._
-import org.apache.flink.streaming.api.windowing.time.Time
-
-import scala.util.{Failure, Success, Try}
 
 /**
   * Created by ryoasu on 2017/07/10.
@@ -13,7 +10,8 @@ object LogCountFlink extends App {
 
   var port: Int = 0
 
-  case class AccessLog(api: String, version: String, recommendId: String, targetAndFallback: String, count: Long = 1)
+  case class AccessLog(api: String, version: String, recommendId: String, targetAndFallback: String)
+
   case class AccessPrintLog(recommendId: String, count: Long = 1)
 
   // the port to connect to
